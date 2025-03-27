@@ -1,5 +1,8 @@
 #include <MeMCore.h>
 
+MeIR irReceiver();
+MeBuzzer buzzer();
+int fsrPin=A0;
 MeUltrasonicSensor ultrasonic(PORT_2);  
 MeLineFollower lineFinder(PORT_3); /* Line Finder module can only be connected to PORT_3, PORT_4, PORT_5, PORT_6 of base shield. */
 MeDCMotor leftMotor(M1);                
@@ -9,7 +12,8 @@ MeDCMotor rightMotor(M2);
 #define TURN_DELAY 3000     
 #define OBSTACLE_DISTANCE 8 
 #define ALIGN_DELAY 100
-
+#define STOP_IRSIGNAL 500
+#define BUZZER_WEIGHT 600
 
 unsigned long lastTurnTime = 0;  
 unsigned long AVOID_TIME = TURN_DELAY * 1.5;
@@ -30,6 +34,8 @@ void setup() {
 
 void loop() {
    int sensorState = lineFinder.readSensors();
+   int irSignal = irReceiver.getCode();
+   int fsrValue=analogRead(fsrPin);
    if(sensorState ==  S1_OUT_S2_OUT){
       Serial.println("Sensor left(1) and right(2) are outside of black line. Safe to go!");
    }
@@ -83,6 +89,20 @@ void loop() {
         }
     } else {
         moveForward(100); 
+    }
+
+    if (irSignal!=-1 && irSignal>500){
+      stopMotors();
+    } else {
+      moveForward(100);
+    }
+    Serial.print("irSignal:");
+    Serial.println(irSignal);
+
+    if (frsValue>BUZZER_WEIGHT) {
+      buzzer.tone(500);
+    } else {
+      buzzer.noTone();
     }
 }
 
