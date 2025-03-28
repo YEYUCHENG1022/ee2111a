@@ -1,6 +1,6 @@
 #include <MeMCore.h>
 
-MeIR irReceiver();
+int photoDiodePin=A1;
 MeBuzzer buzzer();
 int fsrPin=A0;
 MeUltrasonicSensor ultrasonic(PORT_2);  
@@ -34,7 +34,7 @@ void setup() {
 
 void loop() {
    int sensorState = lineFinder.readSensors();
-   int irSignal = irReceiver.getCode();
+   int irSignal = analogRead(photoDiodePin);
    int fsrValue=analogRead(fsrPin);
    if(sensorState ==  S1_OUT_S2_OUT){
       Serial.println("Sensor left(1) and right(2) are outside of black line. Safe to go!");
@@ -91,7 +91,7 @@ void loop() {
         moveForward(100); 
     }
 
-    if (irSignal!=-1 && irSignal>500){
+    if (irSignal!=-1 && irSignal>STOP_IRSIGNAL){
       stopMotors();
     } else {
       moveForward(100);
